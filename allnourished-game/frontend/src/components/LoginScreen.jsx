@@ -25,28 +25,28 @@ export default function LoginScreen({ error, onBack, onSubmit }) {
       <div className="info-card login-card">
         <h2>{mode === 'login' ? 'log in' : 'create account'}</h2>
         <div className="auth-toggle">
-          <button className={mode === 'login' ? 'active-toggle' : ''} onClick={() => setMode('login')}>log in</button>
-          <button className={mode === 'register' ? 'active-toggle' : ''} onClick={() => setMode('register')}>register</button>
+          <button className={mode === 'login' ? 'active-toggle' : ''} onClick={() => setMode('login')}>Log in</button>
+          <button className={mode === 'register' ? 'active-toggle' : ''} onClick={() => setMode('register')}>Register</button>
         </div>
         <form className="login-form" onSubmit={handleSubmit}>
           {mode === 'register' ? (
             <label>
-              username
+              Username
               <input name="username" value={form.username} onChange={updateField} required />
             </label>
           ) : null}
           <label>
-            email
+            Email
             <input type="email" name="email" value={form.email} onChange={updateField} required />
           </label>
           <label>
-            password
+            Password
             <input type="password" name="password" value={form.password} onChange={updateField} required />
           </label>
           {error ? <p className="error-text">{error}</p> : null}
           <button type="submit">{mode === 'login' ? 'enter kitchen' : 'create account'}</button>
         </form>
-        <button className="secondary-button" onClick={onBack}>back</button>
+        <button className="secondary-button" onClick={onBack}>Back</button>
       </div>
     </div>
   )

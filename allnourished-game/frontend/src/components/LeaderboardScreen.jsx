@@ -4,14 +4,14 @@ export default function LeaderboardScreen({ entries, loading, onBack }) {
       <div className="info-card wide-card">
         <h2>leaderboard</h2>
         {loading ? <p>loading scores...</p> : null}
-        {!loading && entries.length === 0 ? <p>no scores yet.</p> : null}
+        {!loading && entries.length === 0 ? <p>No scores yet.</p> : null}
         {!loading && entries.length > 0 ? (
           <div className="leaderboard-table">
             <div className="leaderboard-row leaderboard-head">
-              <span>rank</span>
-              <span>player</span>
-              <span>score</span>
-              <span>time</span>
+              <span>Rank</span>
+              <span>Player</span>
+              <span>Score</span>
+              <span>Time</span>
             </div>
             {entries.map((entry, index) => (
               <div className="leaderboard-row" key={entry.id || `${entry.username}-${index}`}>
@@ -23,7 +23,7 @@ export default function LeaderboardScreen({ entries, loading, onBack }) {
             ))}
           </div>
         ) : null}
-        <button onClick={onBack}>back</button>
+        <button onClick={onBack}>Back</button>
       </div>
     </div>
   )

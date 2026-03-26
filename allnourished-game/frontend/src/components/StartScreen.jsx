@@ -12,23 +12,23 @@ export default function StartScreen({
     <div className="screen menu-screen">
       <div className="menu-card">
         <p className="eyebrow">allnourished</p>
-        <h1>zero hunger kitchen</h1>
+        <h1>Zero Hunger Kitchen</h1>
         <p className="subtitle">
-          serve meals, restock ingredients, and survive the rush.
+          Serve meals, restock ingredients, and survive the rush.
         </p>
 
         <div className="status-pill">
-          {isLoggedIn ? `logged in as ${username}` : 'not logged in'}
+          {isLoggedIn ? `Logged in as ${username}` : 'Logged out.'}
         </div>
         {authError ? <p className="error-text">{authError}</p> : null}
 
         <div className="menu-buttons">
-          <button onClick={onPlay}>play</button>
-          <button onClick={onLeaderboard}>leaderboard</button>
-          <button onClick={onTutorial}>tutorial</button>
-          <button onClick={onLogin}>{isLoggedIn ? 'switch account' : 'log in'}</button>
+          <button onClick={onPlay}>Play</button>
+          <button onClick={onLeaderboard}>Leaderboard</button>
+          <button onClick={onTutorial}>Tutorial</button>
+          <button onClick={onLogin}>{isLoggedIn ? 'Switch account' : 'Log in/Register'}</button>
           {isLoggedIn ? (
-            <button className="secondary-button" onClick={onLogout}>logout</button>
+            <button className="secondary-button" onClick={onLogout}>Logout</button>
           ) : null}
         </div>
       </div>
