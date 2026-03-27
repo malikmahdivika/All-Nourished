@@ -14,3 +14,20 @@ CREATE TABLE scores (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY(user_id) REFERENCES users(id)
 );
+
+CREATE TABLE user_progress (
+  user_id INTEGER PRIMARY KEY,
+  total_meals_served INTEGER NOT NULL DEFAULT 0,
+  total_survival_time INTEGER NOT NULL DEFAULT 0,
+  current_level INTEGER NOT NULL DEFAULT 1,
+  FOREIGN KEY(user_id) REFERENCES users(id)
+);
+
+CREATE TABLE user_achievements (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  achievement_key TEXT NOT NULL,
+  unlocked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, achievement_key),
+  FOREIGN KEY(user_id) REFERENCES users(id)
+);

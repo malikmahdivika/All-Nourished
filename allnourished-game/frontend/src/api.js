@@ -46,7 +46,7 @@ export async function fetchLeaderboard() {
   return handleResponse(response)
 }
 
-export async function submitScore(token, score, timeSurvived) {
+export async function submitScore(token, score, timeSurvived, mealsServed) {
   const response = await fetch(`${API_BASE}/scores`, {
     method: 'POST',
     headers: {
@@ -56,8 +56,18 @@ export async function submitScore(token, score, timeSurvived) {
     body: JSON.stringify({
       score,
       survivalTime: timeSurvived,
+      mealsServed,
     }),
   })
 
+  return handleResponse(response)
+}
+
+export async function fetchUserProgress(token) {
+  const response = await fetch(`${API_BASE}/user/progress`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
   return handleResponse(response)
 }

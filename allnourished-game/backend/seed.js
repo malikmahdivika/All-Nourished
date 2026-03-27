@@ -12,6 +12,11 @@ export async function seedSampleData() {
       ['demo-player', 'demo@allnourished.dev', passwordHash]
     )
 
+    await run(
+      'INSERT OR IGNORE INTO user_progress (user_id, total_meals_served, total_survival_time, current_level) VALUES (?, 0, 0, 1)',
+      [user.lastID]
+    )
+
     await run('INSERT INTO scores (user_id, score, survival_time) VALUES (?, ?, ?)', [user.lastID, 45, 52])
     await run('INSERT INTO scores (user_id, score, survival_time) VALUES (?, ?, ?)', [user.lastID, 90, 101])
   }

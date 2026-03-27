@@ -5,6 +5,7 @@ export default function StartScreen({
   onPlay,
   onLeaderboard,
   onTutorial,
+  onAchievements,
   onLogin,
   onLogout,
 }) {
@@ -26,6 +27,7 @@ export default function StartScreen({
           <button onClick={onPlay}>Play</button>
           <button onClick={onLeaderboard}>Leaderboard</button>
           <button onClick={onTutorial}>Tutorial</button>
+          <button onClick={onAchievements}>Achievements</button>
           <button onClick={onLogin}>{isLoggedIn ? 'Switch account' : 'Log in/Register'}</button>
           {isLoggedIn ? (
             <button className="secondary-button" onClick={onLogout}>Logout</button>

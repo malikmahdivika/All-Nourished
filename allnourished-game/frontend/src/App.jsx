@@ -1,5 +1,11 @@
-import { useMemo, useState } from 'react'
-import { fetchLeaderboard, loginUser, registerUser, submitScore } from './api'
+import { useEffect, useMemo, useState } from 'react'
+import {
+  fetchLeaderboard,
+  fetchUserProgress,
+  loginUser,
+  registerUser,
+  submitScore,
+} from './api'
 import StartScreen from './components/StartScreen'
 import TutorialScreen from './components/TutorialScreen'
 import LeaderboardScreen from './components/LeaderboardScreen'
@@ -7,6 +13,7 @@ import LoginScreen from './components/LoginScreen'
 import CountdownScreen from './components/CountdownScreen'
 import GameScreen from './components/GameScreen'
 import GameOverScreen from './components/GameOverScreen'
+import AchievementsScreen from './components/AchievementsScreen'
 
 export default function App() {
   const [screen, setScreen] = useState('start')
@@ -19,9 +26,17 @@ export default function App() {
   const [authError, setAuthError] = useState('')
   const [gameResult, setGameResult] = useState(null)
   const [saveStatus, setSaveStatus] = useState('')
+  const [userProgress, setUserProgress] = useState({ total_meals_served: 0, current_level: 1 })
+  const [userAchievements, setUserAchievements] = useState([])
 
   const isLoggedIn = Boolean(auth.token)
   const username = auth.user?.username || 'Guest'
+
+  useEffect(() => {
+    if (auth.token) {
+      loadUserProgress(auth.token)
+    }
+  }, [auth.token])
 
   async function loadLeaderboard() {
     setLeaderboardLoading(true)
@@ -32,6 +47,17 @@ export default function App() {
       setLeaderboard([])
     } finally {
       setLeaderboardLoading(false)
+    }
+  }
+
+  async function loadUserProgress(token) {
+    if (!token) return
+    try {
+      const data = await fetchUserProgress(token)
+      setUserProgress(data.progress || { total_meals_served: 0, current_level: 1 })
+      setUserAchievements(data.achievements || [])
+    } catch (error) {
+      console.error('unable to load user progress', error)
     }
   }
 
@@ -46,6 +72,9 @@ export default function App() {
       goLeaderboard: async () => {
         setScreen('leaderboard')
         await loadLeaderboard()
+      },
+      goAchievements: () => {
+        setScreen('achievements')
       },
       startGame: () => {
         if (!isLoggedIn) {
@@ -63,8 +92,19 @@ export default function App() {
 
         if (isLoggedIn) {
           try {
-            await submitScore(auth.token, result.score, result.timeSurvived)
+            const response = await submitScore(
+              auth.token,
+              result.score,
+              result.timeSurvived,
+              result.mealsServed
+            )
             setSaveStatus('score saved successfully.')
+            if (response.progress) {
+              setUserProgress(response.progress)
+            }
+            if (response.unlockedAchievements) {
+              loadUserProgress(auth.token)
+            }
             await loadLeaderboard()
           } catch (error) {
             console.error(error)
@@ -96,6 +136,7 @@ export default function App() {
       const nextAuth = { token: response.token, user: response.user }
       localStorage.setItem('allnourished-auth', JSON.stringify(nextAuth))
       setAuth(nextAuth)
+      await loadUserProgress(nextAuth.token)
       setScreen('start')
     } catch (error) {
       setAuthError(error.message)
@@ -112,6 +153,7 @@ export default function App() {
           onPlay={nav.startGame}
           onLeaderboard={nav.goLeaderboard}
           onTutorial={nav.goTutorial}
+          onAchievements={nav.goAchievements}
           onLogin={nav.goLogin}
           onLogout={nav.logout}
         />
@@ -123,6 +165,14 @@ export default function App() {
         <LeaderboardScreen
           loading={leaderboardLoading}
           entries={leaderboard}
+          onBack={nav.goStart}
+        />
+      )}
+
+      {screen === 'achievements' && (
+        <AchievementsScreen
+          progress={userProgress}
+          achievements={userAchievements}
           onBack={nav.goStart}
         />
       )}
@@ -141,6 +191,7 @@ export default function App() {
         <GameScreen
           username={username}
           onGameOver={nav.finishGame}
+          userProgress={userProgress}
         />
       )}
 

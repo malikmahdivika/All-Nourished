@@ -1,20 +1,25 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { FOOD_FACTS, INGREDIENTS, MEALS, randomMeal } from '../gameData'
+import {
+  FOOD_FACTS,
+  getAvailableIngredients,
+  getAvailableMeals,
+  randomMeal,
+} from '../gameData'
 
 const START_STOCK = 5
 const MAX_STOCK = 6
 const MAX_QUEUE = 5
 
 const CUSTOMER_VARIANTS = [
-  { head: '#f1c27d', body: '#6f8fb8', hair: '#3a2a22', emoji: '🙂' },
-  { head: '#e0ac69', body: '#8b6b61', hair: '#2b1d17', emoji: '🙂' },
-  { head: '#c68642', body: '#5b8a72', hair: '#3b2b22', emoji: '🙂' },
-  { head: '#8d5524', body: '#8d6aa8', hair: '#1c140f', emoji: '🙂' },
-  { head: '#f1c27d', body: '#a87450', hair: '#d2b48c', emoji: '🙂' },
+  { head: '#f1c27d', body: '#6f8fb8', hair: '#3a2a22', emoji: '??' },
+  { head: '#e0ac69', body: '#8b6b61', hair: '#2b1d17', emoji: '??' },
+  { head: '#c68642', body: '#5b8a72', hair: '#3b2b22', emoji: '??' },
+  { head: '#8d5524', body: '#8d6aa8', hair: '#1c140f', emoji: '??' },
+  { head: '#f1c27d', body: '#a87450', hair: '#d2b48c', emoji: '??' },
 ]
 
-function createCustomer(id, difficulty) {
-  const meal = randomMeal()
+function createCustomer(id, difficulty, level) {
+  const meal = randomMeal(level)
   const patience = Math.max(4, 15 - difficulty * 1.2)
   const look = CUSTOMER_VARIANTS[id % CUSTOMER_VARIANTS.length]
 
@@ -30,14 +35,16 @@ function createCustomer(id, difficulty) {
 }
 
 function canServeMeal(meal, stock) {
-  return Object.entries(meal.ingredients).every(([ingredient, amount]) => stock[ingredient] >= amount)
+  return Object.entries(meal.ingredients).every(
+    ([ingredient, amount]) => stock[ingredient] >= amount
+  )
 }
 
 function getPatiencePercent(customer) {
   return Math.max(0, Math.round((customer.patience / customer.maxPatience) * 100))
 }
 
-export default function GameScreen({ username, onGameOver }) {
+export default function GameScreen({ username, userProgress = {}, onGameOver }) {
   const customerIdRef = useRef(1)
 
   const [score, setScore] = useState(0)
@@ -45,11 +52,37 @@ export default function GameScreen({ username, onGameOver }) {
   const [elapsed, setElapsed] = useState(0)
   const [selectedMealId, setSelectedMealId] = useState(null)
   const [factIndex, setFactIndex] = useState(0)
-  const [stock, setStock] = useState(() =>
-    Object.fromEntries(INGREDIENTS.map((name) => [name, START_STOCK]))
-  )
-  const [queue, setQueue] = useState(() => [createCustomer(customerIdRef.current++, 0)])
+  const [mealsServed, setMealsServed] = useState(0)
   const [toast, setToast] = useState('serve the right meal and keep ingredients stocked.')
+
+  const baseMealsServed = Number(userProgress.total_meals_served || 0)
+  const baseLevel = Number(userProgress.current_level || 1)
+
+  const currentLevel = useMemo(
+    () => Math.max(baseLevel, Math.floor((baseMealsServed + mealsServed) / 10) + 1),
+    [baseLevel, baseMealsServed, mealsServed]
+  )
+
+  const availableIngredients = getAvailableIngredients(currentLevel)
+  const availableMeals = getAvailableMeals(currentLevel)
+
+  const [stock, setStock] = useState(() =>
+    Object.fromEntries(availableIngredients.map((name) => [name, START_STOCK]))
+  )
+
+  useEffect(() => {
+    setStock((currentStock) => {
+      const nextStock = { ...currentStock }
+      availableIngredients.forEach((ingredient) => {
+        if (nextStock[ingredient] === undefined) {
+          nextStock[ingredient] = START_STOCK
+        }
+      })
+      return nextStock
+    })
+  }, [availableIngredients])
+
+  const [queue, setQueue] = useState(() => [createCustomer(customerIdRef.current++, 0, currentLevel)])
 
   const difficulty = Math.floor(elapsed / 10)
 
@@ -75,12 +108,12 @@ export default function GameScreen({ username, onGameOver }) {
     const spawner = window.setInterval(() => {
       setQueue((current) => {
         if (current.length >= MAX_QUEUE) return current
-        return [...current, createCustomer(customerIdRef.current++, difficulty)]
+        return [...current, createCustomer(customerIdRef.current++, difficulty, currentLevel)]
       })
     }, spawnRate)
 
     return () => window.clearInterval(spawner)
-  }, [difficulty])
+  }, [difficulty, currentLevel])
 
   useEffect(() => {
     const patienceTimer = window.setInterval(() => {
@@ -110,18 +143,18 @@ export default function GameScreen({ username, onGameOver }) {
           )
         }
 
-        return next.length > 0 ? next : [createCustomer(customerIdRef.current++, difficulty)]
+        return next.length > 0 ? next : [createCustomer(customerIdRef.current++, difficulty, currentLevel)]
       })
     }, 500)
 
     return () => window.clearInterval(patienceTimer)
-  }, [difficulty]) 
+  }, [difficulty, currentLevel])
 
   useEffect(() => {
     if (lives <= 0) {
-      onGameOver({ score, timeSurvived: elapsed })
+      onGameOver({ score, timeSurvived: elapsed, mealsServed })
     }
-  }, [elapsed, lives, onGameOver, score])
+  }, [elapsed, lives, onGameOver, score, mealsServed])
 
   function handleMealClick(meal) {
     if (!canServeMeal(meal, stock)) {
@@ -134,7 +167,7 @@ export default function GameScreen({ username, onGameOver }) {
   }
 
   function handleCustomerClick(customer) {
-    const selectedMeal = MEALS.find((meal) => meal.id === selectedMealId)
+    const selectedMeal = availableMeals.find((meal) => meal.id === selectedMealId)
 
     if (!selectedMeal) {
       setToast('pick a meal first.')
@@ -164,12 +197,13 @@ export default function GameScreen({ username, onGameOver }) {
 
     setQueue((current) => {
       const filtered = current.filter((item) => item.id !== customer.id)
-      return filtered.length > 0 ? filtered : [createCustomer(customerIdRef.current++, difficulty)]
+      return filtered.length > 0 ? filtered : [createCustomer(customerIdRef.current++, difficulty, currentLevel)]
     })
 
     setScore((current) => current + 10)
     setSelectedMealId(null)
     setToast(`served ${customer.requestedMealName} successfully.`)
+    setMealsServed((current) => current + 1)
   }
 
   function restockIngredient(name) {
@@ -189,19 +223,19 @@ export default function GameScreen({ username, onGameOver }) {
     <div className="game-screen dark-theme-screen">
       <header className="dark-hud">
         <div className="hud-pill">
-          <span className="hud-icon">👤</span>
+          <span className="hud-icon">??</span>
           <span className="hud-label">player</span>
           <span className="hud-value">{username}</span>
         </div>
 
         <div className="hud-pill">
-          <span className="hud-icon">🍽️</span>
+          <span className="hud-icon">???</span>
           <span className="hud-label">score</span>
           <span className="hud-value">{score}</span>
         </div>
 
         <div className="hud-pill">
-          <span className="hud-icon">⏱️</span>
+          <span className="hud-icon">??</span>
           <span className="hud-label">time</span>
           <span className="hud-value">{elapsed}s</span>
         </div>
@@ -210,9 +244,15 @@ export default function GameScreen({ username, onGameOver }) {
           <span className="hud-label">lives</span>
           <div className="hud-hearts">
             {hearts.map((full, index) => (
-              <span key={index}>{full ? '❤️' : '🖤'}</span>
+              <span key={index}>{full ? '??' : '??'}</span>
             ))}
           </div>
+        </div>
+
+        <div className="hud-pill">
+          <span className="hud-icon">?</span>
+          <span className="hud-label">level</span>
+          <span className="hud-value">{currentLevel}</span>
         </div>
       </header>
 
@@ -230,7 +270,7 @@ export default function GameScreen({ username, onGameOver }) {
           <div className="queue-lane">
             {queue.map((customer) => {
               const patiencePercent = getPatiencePercent(customer)
-              const meal = MEALS.find((item) => item.id === customer.requestedMealId)
+              const meal = availableMeals.find((item) => item.id === customer.requestedMealId)
 
               return (
                 <button
@@ -244,31 +284,19 @@ export default function GameScreen({ username, onGameOver }) {
                   </div>
 
                   <div className="human-figure-wrap">
-                    <div
-                      className="human-head"
-                      style={{ backgroundColor: customer.look.head }}
-                    >
-                      <div
-                        className="human-hair"
-                        style={{ backgroundColor: customer.look.hair }}
-                      />
+                    <div className="human-head" style={{ backgroundColor: customer.look.head }}>
+                      <div className="human-hair" style={{ backgroundColor: customer.look.hair }} />
                       <span className="human-face">{customer.look.emoji}</span>
                     </div>
 
-                    <div
-                      className="human-body"
-                      style={{ backgroundColor: customer.look.body }}
-                    />
+                    <div className="human-body" style={{ backgroundColor: customer.look.body }} />
                     <div className="human-shadow" />
                   </div>
 
                   <div className="customer-name">{customer.name}</div>
 
                   <div className="patience-bar dark-patience-bar">
-                    <div
-                      className="patience-fill"
-                      style={{ width: `${patiencePercent}%` }}
-                    />
+                    <div className="patience-fill" style={{ width: `${patiencePercent}%` }} />
                   </div>
                 </button>
               )
@@ -286,17 +314,13 @@ export default function GameScreen({ username, onGameOver }) {
             </div>
 
             <div className="station-grid">
-              {MEALS.map((meal) => {
+              {availableMeals.map((meal) => {
                 const available = canServeMeal(meal, stock)
 
                 return (
                   <button
                     key={meal.id}
-                    className={[
-                      'station-card',
-                      selectedMealId === meal.id ? 'selected-station' : '',
-                      !available ? 'disabled-station' : '',
-                    ].join(' ')}
+                    className={['station-card', selectedMealId === meal.id ? 'selected-station' : '', !available ? 'disabled-station' : ''].join(' ')}
                     onClick={() => handleMealClick(meal)}
                   >
                     <div className="station-ring">
@@ -328,7 +352,7 @@ export default function GameScreen({ username, onGameOver }) {
             </div>
 
             <div className="ingredient-grid dark-ingredient-grid">
-              {INGREDIENTS.map((ingredient) => (
+              {availableIngredients.map((ingredient) => (
                 <button
                   key={ingredient}
                   className="ingredient-card compact-ingredient-card"
@@ -337,10 +361,7 @@ export default function GameScreen({ username, onGameOver }) {
                   <span className="ingredient-name">{ingredient}</span>
                   <strong>{stock[ingredient]}/{MAX_STOCK}</strong>
                   <div className="stock-bar">
-                    <div
-                      className="stock-fill"
-                      style={{ width: `${(stock[ingredient] / MAX_STOCK) * 100}%` }}
-                    />
+                    <div className="stock-fill" style={{ width: `${(stock[ingredient] / MAX_STOCK) * 100}%` }} />
                   </div>
                   <small>click to restock</small>
                 </button>
