@@ -56,10 +56,11 @@ export default function GameScreen({ username, userProgress = {}, onGameOver }) 
   const [mealsServed, setMealsServed] = useState(0)
   const [toast, setToast] = useState('serve the right meal and keep ingredients stocked.')
   const [levelUpInfo, setLevelUpInfo] = useState(null)
-  const prevLevelRef = useRef(baseLevel)
 
   const baseMealsServed = Number(userProgress.total_meals_served || 0)
   const baseLevel = Number(userProgress.current_level || 1)
+
+  const prevLevelRef = useRef(baseLevel)
 
   const currentLevel = useMemo(
     () => Math.min(MAX_LEVEL, Math.max(baseLevel, Math.floor((baseMealsServed + mealsServed) / 10) + 1)),

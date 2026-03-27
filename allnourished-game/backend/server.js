@@ -48,7 +48,7 @@ async function updateUserProgress(userId, sessionMealsServed, sessionSurvivalTim
 
   const totalMealsServed = progress.total_meals_served + sessionMealsServed
   const totalSurvivalTime = progress.total_survival_time + sessionSurvivalTime
-  const newLevel = Math.max(1, Math.floor(totalMealsServed / 10) + 1)
+  const newLevel = Math.min(5, Math.max(1, Math.floor(totalMealsServed / 10) + 1))
 
   await run(
     'UPDATE user_progress SET total_meals_served = ?, total_survival_time = ?, current_level = ? WHERE user_id = ?',
