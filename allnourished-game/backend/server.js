@@ -231,6 +231,38 @@ app.post('/api/scores', requireAuth, async (request, response) => {
   }
 })
 
+// RESET ENDPOINT FOR TESTING PURPOSES; DO NOT KEEP IN PRODUCTION LOL
+app.post('/api/debug/reset-progress', requireAuth, async (request, response) => {
+  try {
+    const userId = request.user.id
+
+    await run(
+      'UPDATE user_progress SET total_meals_served = 0, total_survival_time = 0, current_level = 1 WHERE user_id = ?',
+      [userId]
+    )
+
+    await run('DELETE FROM user_achievements WHERE user_id = ?', [userId])
+
+    const progress = await getUserProgress(userId)
+    const userAchievements = await getUsersAchievements(userId)
+    const achievements = ACHIEVEMENT_DEFINITIONS.map((achievement) => ({
+      ...achievement,
+      unlocked: Boolean(userAchievements[achievement.key]),
+      unlockedAt: userAchievements[achievement.key] || null,
+    }))
+
+    return response.json({
+      ok: true,
+      message: 'progress and achievements reset successfully.',
+      progress,
+      achievements,
+    })
+  } catch (error) {
+    console.error(error)
+    return response.status(500).json({ error: 'failed to reset progress.' })
+  }
+})
+
 async function start() {
   await initDb()
   await seedSampleData()
