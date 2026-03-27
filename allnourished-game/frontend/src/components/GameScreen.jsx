@@ -9,6 +9,7 @@ import {
 const START_STOCK = 5
 const MAX_STOCK = 6
 const MAX_QUEUE = 5
+const MAX_LEVEL = 5
 
 const CUSTOMER_VARIANTS = [
   { head: '#f1c27d', body: '#6f8fb8', hair: '#3a2a22', emoji: '??' },
@@ -54,12 +55,14 @@ export default function GameScreen({ username, userProgress = {}, onGameOver }) 
   const [factIndex, setFactIndex] = useState(0)
   const [mealsServed, setMealsServed] = useState(0)
   const [toast, setToast] = useState('serve the right meal and keep ingredients stocked.')
+  const [levelUpInfo, setLevelUpInfo] = useState(null)
+  const prevLevelRef = useRef(baseLevel)
 
   const baseMealsServed = Number(userProgress.total_meals_served || 0)
   const baseLevel = Number(userProgress.current_level || 1)
 
   const currentLevel = useMemo(
-    () => Math.max(baseLevel, Math.floor((baseMealsServed + mealsServed) / 10) + 1),
+    () => Math.min(MAX_LEVEL, Math.max(baseLevel, Math.floor((baseMealsServed + mealsServed) / 10) + 1)),
     [baseLevel, baseMealsServed, mealsServed]
   )
 
@@ -103,6 +106,8 @@ export default function GameScreen({ username, userProgress = {}, onGameOver }) 
   }, [])
 
   useEffect(() => {
+    if (levelUpInfo) return
+
     const spawnRate = Math.max(1500, 5000 - difficulty * 350)
 
     const spawner = window.setInterval(() => {
@@ -113,9 +118,11 @@ export default function GameScreen({ username, userProgress = {}, onGameOver }) 
     }, spawnRate)
 
     return () => window.clearInterval(spawner)
-  }, [difficulty, currentLevel])
+  }, [difficulty, currentLevel, levelUpInfo])
 
   useEffect(() => {
+    if (levelUpInfo) return
+
     const patienceTimer = window.setInterval(() => {
       let misses = 0
       const decrement = 0.5 * (1 + difficulty * 0.1)
@@ -148,7 +155,7 @@ export default function GameScreen({ username, userProgress = {}, onGameOver }) 
     }, 500)
 
     return () => window.clearInterval(patienceTimer)
-  }, [difficulty, currentLevel])
+  }, [difficulty, currentLevel, levelUpInfo])
 
   useEffect(() => {
     if (lives <= 0) {
@@ -156,7 +163,32 @@ export default function GameScreen({ username, userProgress = {}, onGameOver }) 
     }
   }, [elapsed, lives, onGameOver, score, mealsServed])
 
+  useEffect(() => {
+    if (currentLevel > prevLevelRef.current) {
+      const previousLevel = prevLevelRef.current
+      const prevIngredients = getAvailableIngredients(previousLevel)
+      const newIngredients = getAvailableIngredients(currentLevel).filter(
+        (ing) => !prevIngredients.includes(ing)
+      )
+      
+      const prevMeals = getAvailableMeals(previousLevel)
+      const newMeals = getAvailableMeals(currentLevel).filter(
+        (meal) => !prevMeals.find((m) => m.id === meal.id)
+      )
+
+      setLevelUpInfo({
+        level: currentLevel,
+        newIngredients,
+        newMeals,
+      })
+
+      prevLevelRef.current = currentLevel
+    }
+  }, [currentLevel])
+
   function handleMealClick(meal) {
+    if (levelUpInfo) return
+
     if (!canServeMeal(meal, stock)) {
       setToast(`${meal.name} is unavailable. restock ingredients first.`)
       return
@@ -167,6 +199,8 @@ export default function GameScreen({ username, userProgress = {}, onGameOver }) 
   }
 
   function handleCustomerClick(customer) {
+    if (levelUpInfo) return
+
     const selectedMeal = availableMeals.find((meal) => meal.id === selectedMealId)
 
     if (!selectedMeal) {
@@ -207,6 +241,8 @@ export default function GameScreen({ username, userProgress = {}, onGameOver }) 
   }
 
   function restockIngredient(name) {
+    if (levelUpInfo) return
+
     setStock((current) => {
       const nextAmount = Math.min(MAX_STOCK, current[name] + 2)
       return { ...current, [name]: nextAmount }
@@ -372,6 +408,43 @@ export default function GameScreen({ username, userProgress = {}, onGameOver }) 
       </main>
 
       <footer className="toast-bar dark-toast-bar">{toast}</footer>
+
+      {levelUpInfo && (
+        <div className="level-up-overlay">
+          <div className="level-up-modal">
+            <h2>🎉 level {levelUpInfo.level} reached!</h2>
+            
+            {levelUpInfo.newIngredients.length > 0 && (
+              <div className="unlock-section">
+                <h3>new ingredient unlocked:</h3>
+                <ul className="unlock-list">
+                  {levelUpInfo.newIngredients.map((ingredient) => (
+                    <li key={ingredient}>⭐ {ingredient}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {levelUpInfo.newMeals.length > 0 && (
+              <div className="unlock-section">
+                <h3>new dishes available:</h3>
+                <ul className="unlock-list">
+                  {levelUpInfo.newMeals.map((meal) => (
+                    <li key={meal.id}>{meal.icon} {meal.name}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <button
+              className="level-up-button"
+              onClick={() => setLevelUpInfo(null)}
+            >
+              continue
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

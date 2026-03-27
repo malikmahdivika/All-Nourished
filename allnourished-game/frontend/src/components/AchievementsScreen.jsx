@@ -2,7 +2,7 @@ export default function AchievementsScreen({ progress = {}, achievements = [], o
   return (
     <div className="screen info-screen">
       <div className="info-card">
-        <h2>achievements</h2>
+        <h2>Achievements</h2>
 
         <p>level: <strong>{progress.current_level == 5 ? "5 (MAX)" : progress.current_level || 1}</strong></p>
         <p>total meals served: <strong>{progress.total_meals_served || 0}</strong></p>
