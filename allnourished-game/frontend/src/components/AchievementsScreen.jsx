@@ -4,22 +4,41 @@ export default function AchievementsScreen({ progress = {}, achievements = [], o
       <div className="info-card">
         <h2>Achievements</h2>
 
-        <p>level: <strong>{progress.current_level == 5 ? "5 (MAX)" : progress.current_level || 1}</strong></p>
-        <p>total meals served: <strong>{progress.total_meals_served || 0}</strong></p>
-        <p>total survival time: <strong>{progress.total_survival_time || 0}s</strong></p>
+        <div className="achievements-container">
+          <div className="stat-cards">
+            <div className="stat-card">
+              <span className="stat-icon">📊</span>
+              <span className="stat-label">level</span>
+              <span className="stat-value">{progress.current_level == 5 ? '5 (MAX)' : progress.current_level || 1}</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-icon">🍽️</span>
+              <span className="stat-label">meals served</span>
+              <span className="stat-value">{progress.total_meals_served || 0}</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-icon">⏱️</span>
+              <span className="stat-label">survival time</span>
+              <span className="stat-value">{progress.total_survival_time || 0}s</span>
+            </div>
+          </div>
 
-        <ul className="achievement-list">
-          {achievements.map((achievement) => (
-            <li key={achievement.key} className={achievement.unlocked ? 'unlocked' : 'locked'}>
-              <strong>{achievement.title}</strong> - {achievement.description}
-              {achievement.unlocked ? (
-                <span className="achievement-meta"> unlocked {new Date(achievement.unlockedAt).toLocaleDateString()}</span>
-              ) : (
-                <span className="achievement-meta"> locked</span>
-              )}
-            </li>
-          ))}
-        </ul>
+          <div className="achievement-grid">
+            {achievements.map((achievement) => (
+              <div key={achievement.key} className={`achievement-card ${achievement.unlocked ? 'unlocked' : 'locked'}`}>
+                <div className="achievement-content">
+                  <h3>{achievement.title}</h3>
+                  <p>{achievement.description}</p>
+                  {achievement.unlocked ? (
+                    <span className="achievement-status">✓ Unlocked</span>
+                  ) : (
+                    <span className="achievement-status locked-status">🔒 Locked</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
         <div className="menu-buttons compact-buttons">
           <button onClick={onBack}>back</button>
