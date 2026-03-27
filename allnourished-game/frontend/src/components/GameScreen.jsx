@@ -12,11 +12,11 @@ const MAX_QUEUE = 5
 const MAX_LEVEL = 5
 
 const CUSTOMER_VARIANTS = [
-  { head: '#f1c27d', body: '#6f8fb8', hair: '#3a2a22', emoji: '??' },
-  { head: '#e0ac69', body: '#8b6b61', hair: '#2b1d17', emoji: '??' },
-  { head: '#c68642', body: '#5b8a72', hair: '#3b2b22', emoji: '??' },
-  { head: '#8d5524', body: '#8d6aa8', hair: '#1c140f', emoji: '??' },
-  { head: '#f1c27d', body: '#a87450', hair: '#d2b48c', emoji: '??' },
+  { head: '#f1c27d', body: '#6f8fb8', hair: '#3a2a22', emoji: '😊' },
+  { head: '#e0ac69', body: '#8b6b61', hair: '#2b1d17', emoji: '😄' },
+  { head: '#c68642', body: '#5b8a72', hair: '#3b2b22', emoji: '😋' },
+  { head: '#8d5524', body: '#8d6aa8', hair: '#1c140f', emoji: '🤗' },
+  { head: '#f1c27d', body: '#a87450', hair: '#d2b48c', emoji: '😌' },
 ]
 
 function createCustomer(id, difficulty, level) {
@@ -260,19 +260,19 @@ export default function GameScreen({ username, userProgress = {}, onGameOver }) 
     <div className="game-screen dark-theme-screen">
       <header className="dark-hud">
         <div className="hud-pill">
-          <span className="hud-icon">??</span>
+          <span className="hud-icon">👤</span>
           <span className="hud-label">player</span>
           <span className="hud-value">{username}</span>
         </div>
 
         <div className="hud-pill">
-          <span className="hud-icon">???</span>
+          <span className="hud-icon">⭐</span>
           <span className="hud-label">score</span>
           <span className="hud-value">{score}</span>
         </div>
 
         <div className="hud-pill">
-          <span className="hud-icon">??</span>
+          <span className="hud-icon">⏱️</span>
           <span className="hud-label">time</span>
           <span className="hud-value">{elapsed}s</span>
         </div>
@@ -281,13 +281,13 @@ export default function GameScreen({ username, userProgress = {}, onGameOver }) 
           <span className="hud-label">lives</span>
           <div className="hud-hearts">
             {hearts.map((full, index) => (
-              <span key={index}>{full ? '??' : '??'}</span>
+              <span key={index}>{full ? '❤️' : '🤍'}</span>
             ))}
           </div>
         </div>
 
         <div className="hud-pill">
-          <span className="hud-icon">?</span>
+          <span className="hud-icon">📊</span>
           <span className="hud-label">level</span>
           <span className="hud-value">{currentLevel}</span>
         </div>
