@@ -9,6 +9,9 @@ export const FOOD_FACTS = [
 export const BASE_INGREDIENTS = ['Rice', 'Beans', 'Veggies', 'Protein']
 export const LEVEL_UNLOCKED_INGREDIENTS = [
   { name: 'Fruit', unlockLevel: 2 },
+  { name: 'Noodles', unlockLevel: 3 },
+  { name: 'Toast', unlockLevel: 4 },
+  { name: 'Broth', unlockLevel: 5 },
 ]
 
 export const BASE_MEALS = [
@@ -49,6 +52,27 @@ export const LEVEL_UP_MEALS = [
     ingredients: { Fruit: 1, Veggies: 1 },
     icon: '🥣',
     unlockLevel: 2,
+  },
+  {
+    id: 'ramen',
+    name: 'Ramen',
+    ingredients: { Noodles: 1, Broth: 1, Protein: 1, Veggies: 1 },
+    icon: '🍜',
+    unlockLevel: 5,
+  },
+  {
+    id: 'spaghetti',
+    name: 'Spaghetti',
+    ingredients: { Noodles: 1, Protein: 1 },
+    icon: '🍝',
+    unlockLevel: 3,
+  },
+  {
+    id: 'beans-n-toast',
+    name: 'Beans n\' Toast',
+    ingredients: { Beans: 1, Toast: 1 },
+    icon: '🍞',
+    unlockLevel: 4,
   },
 ]
 
