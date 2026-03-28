@@ -270,16 +270,8 @@ app.post('/api/debug/reset-progress', requireAuth, async (request, response) => 
   }
 })
 
-async function start() {
-  await initDb()
-  await seedSampleData()
+// For Vercel - initialize db then export
+await initDb()
+await seedSampleData()
 
-  app.listen(port, () => {
-    console.log(`allnourished backend running on http://localhost:${port}`)
-  })
-}
-
-start().catch((error) => {
-  console.error('failed to start server', error)
-  process.exit(1)
-})
+export default app
