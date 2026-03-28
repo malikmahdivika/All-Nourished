@@ -2,7 +2,7 @@ export default function LeaderboardScreen({ entries, loading, onBack }) {
   return (
     <div className="screen info-screen">
       <div className="info-card wide-card">
-        <h2>leaderboard</h2>
+        <h2>Leaderboard</h2>
         {loading ? <p>loading scores...</p> : null}
         {!loading && entries.length === 0 ? <p>No scores yet.</p> : null}
         {!loading && entries.length > 0 ? (

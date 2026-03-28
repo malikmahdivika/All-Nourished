@@ -2,7 +2,7 @@ export default function TutorialScreen({ onBack }) {
   return (
     <div className="screen info-screen">
       <div className="info-card">
-        <h2>how to play</h2>
+        <h2>How to Play</h2>
         <div className="tutorial-list">
           <p>1. The customers line up across the top of the screen and each asks for a meal.</p>
           <p>2. Choose a plate at the bottom, then click the matching customer to serve them.</p>
