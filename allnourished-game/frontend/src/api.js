@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:3001/api'
+const API_BASE = import.meta.env.VITE_API_URL;
 
 async function handleResponse(response) {
   const data = await response.json().catch(() => ({}))
