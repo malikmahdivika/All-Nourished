@@ -6,6 +6,13 @@ import { all, get, initDb, run } from './db.js'
 import { makeToken, requireAuth } from './auth.js'
 import { seedSampleData } from './seed.js'
 
+import cors from 'cors';
+
+app.use(cors({
+  origin: 'https://all-nourished.vercel.app',
+  credentials: true
+}));
+
 const app = express()
 const port = process.env.PORT || 3001
 
