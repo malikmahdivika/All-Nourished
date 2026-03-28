@@ -23,7 +23,7 @@ export default function LoginScreen({ error, onBack, onSubmit }) {
   return (
     <div className="screen info-screen">
       <div className="info-card login-card">
-        <h2>{mode === 'login' ? 'log in' : 'create account'}</h2>
+        <h2>{mode === 'login' ? 'Log In' : 'Create Account'}</h2>
         <div className="auth-toggle">
           <button className={mode === 'login' ? 'active-toggle' : ''} onClick={() => setMode('login')}>Log in</button>
           <button className={mode === 'register' ? 'active-toggle' : ''} onClick={() => setMode('register')}>Register</button>
