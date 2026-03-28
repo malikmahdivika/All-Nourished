@@ -6,17 +6,17 @@ import { all, get, initDb, run } from './db.js'
 import { makeToken, requireAuth } from './auth.js'
 import { seedSampleData } from './seed.js'
 
-import cors from 'cors';
+const app = express()
+const port = process.env.PORT || 3001
 
 app.use(cors({
   origin: 'https://all-nourished.vercel.app',
   credentials: true
-}));
-
-const app = express()
-const port = process.env.PORT || 3001
-
-app.use(cors())
+}))
+app.options('*', cors({
+  origin: 'https://all-nourished.vercel.app',
+  credentials: true
+}))
 app.use(express.json())
 
 function sanitizeText(value, maxLength = 60) {
