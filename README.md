@@ -7,6 +7,9 @@ A full-stack game for SDG 2: Zero Hunger.
 - Database: SQLite (SQL)
 - Auth: JWT-based login/register flow
 
-## To Run
-- first terminal: cd to backend --> npm install --> npm run dev
-- second terminal: cd to frontend --> npm install --> npm run dev
+## To Run Locally
+- First Terminal: cd to backend --> npm install --> npm run dev
+- Second Terminal: cd to frontend --> npm install --> npm run dev
+
+# Deployment
+https://all-nourished.vercel.app/
